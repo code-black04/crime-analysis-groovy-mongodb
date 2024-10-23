@@ -29,6 +29,21 @@
 
 - Retrieve crimes that occurred near the university accommodations.
 - Group crimes by:
-  - Type of Crime
+  - Type of Crime (e.g., burglary, robbery, etc.)
+  - Last Outcome Resolution (e.g., solved, under investigation, no further action)
+
+## Explanation of Queries
+
+- **Data Selection**: Select all the crimes in the dataset.
+- **Data Projection**: Select only the latitude, longitude, crime type, and last outcome category.
+- **Data Filtering**: Filter crimes within a 1 km radius from these locations:
+  - 52.62557255880064, -1.1274648376762608 (IQ accommodation)
+  - 52.6261360864929, -1.1423652790954384 (The Summit)
+  - 52.61957967664474, -1.1350820606701382 (Freemen’s Common)
+  - 52.60938312669258, -1.0905735877789204 (The Village)
+  - 52.6362874346052, -1.143154206590345 (Merlin Heights)
+  - 52.63192491561155, -1.1297436947865873 (Homes for Students Dover Street Apartments)
+- **Data Combination**: Sum total cases grouped by location and crime type.
+
 
 Link to document: https://docs.google.com/document/d/1uKzc5ywcvgoFMXAJhTSx21n6-sOmbhmK4fAWK5J1HSk/edit?usp=sharing
