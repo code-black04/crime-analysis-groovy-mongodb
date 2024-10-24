@@ -71,7 +71,8 @@ def filteredCrimes = allCrimes.collect { crime ->
 	[
 		location: crime?.location,
 		crime_type: crime?.crime_type,
-		last_outcome_category: crime?.last_outcome_category
+		last_outcome_category: crime?.last_outcome_category,
+		date: crime?.date
 	]
 }
 
@@ -84,7 +85,7 @@ boolean isWithin1Km(double targetLatitude, double targetLongitude, crime) {
 	double crimeLocationLatitude = extractFirstElementOrValue(crime.location.geo.lat)
 	double crimeLocationLongitude = extractFirstElementOrValue(crime.location.geo.lng)
 	double distance = calculateDistance(targetLatitude, targetLongitude, crimeLocationLatitude, crimeLocationLongitude)
-	return distance <= 1.0
+	return distance <= 100.0
 }
 
 //Distance on a sphere: The Haversine Formula referred https://community.esri.com/t5/coordinate-reference-systems-blog/distance-on-a-sphere-the-haversine-formula/ba-p/902128 and https://www.movable-type.co.uk/scripts/latlong.html
@@ -111,3 +112,12 @@ boolean isDuplicate(existingCrime, newCrime) {
 		   existingCrime.crime_type == newCrime.crime_type &&
 		   existingCrime.date == newCrime.date
 }
+
+// Data combination
+
+def groupedByLocation = filteredCrimes.groupBy { it.location }
+                                        .collectEntries { location, crimes -> 
+                                            [location, crimes.groupBy { it.crime_type }.collectEntries { crime_type, entries -> [crime_type, entries.size()]}]}
+def jsonOutputGrouped = JsonOutput.toJson(groupedByLocation)
+println "\nAll Grouped Crimes by location and crime type in JSON format:\n${JsonOutput.prettyPrint(jsonOutputGrouped)}"
+
