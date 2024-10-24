@@ -1,2 +1,2 @@
-package src.main.groovy.exercises
+package exercises
 
