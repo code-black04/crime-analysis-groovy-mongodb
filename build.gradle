@@ -3,7 +3,7 @@ plugins {
 	id 'eclipse'
 }
 
-sourceCompatibility = 21
+sourceCompatibility = 17
 
 eclipse {
 	project {
