@@ -85,7 +85,7 @@ boolean isWithin1Km(double targetLatitude, double targetLongitude, crime) {
 	double crimeLocationLatitude = extractFirstElementOrValue(crime.location.geo.lat)
 	double crimeLocationLongitude = extractFirstElementOrValue(crime.location.geo.lng)
 	double distance = calculateDistance(targetLatitude, targetLongitude, crimeLocationLatitude, crimeLocationLongitude)
-	return distance <= 100.0
+	return distance <= 1.0
 }
 
 //Distance on a sphere: The Haversine Formula referred https://community.esri.com/t5/coordinate-reference-systems-blog/distance-on-a-sphere-the-haversine-formula/ba-p/902128 and https://www.movable-type.co.uk/scripts/latlong.html
