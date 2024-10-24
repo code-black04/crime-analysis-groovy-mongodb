@@ -3,7 +3,7 @@ package exercises
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
-//To-do: Change the location of json to police_crime_date.json before submitting assignment
+//To-do: Change the location of json to police_crime_data.json before submitting assignment
 def jsonFile = new File('src/main/resources/testing.json')
 
 def jsonSlurper = new JsonSlurper()
