@@ -1,15 +1,28 @@
 package exercises
 
+@Grab('org.slf4j:slf4j-simple:1.7.30')
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+
+Logger log = LoggerFactory.getLogger(this.class)
 
 //To-do: Change the location of json to police_crime_date.json before submitting assignment
 def jsonFile = new File('src/main/resources/testing.json')
 
 def jsonSlurper = new JsonSlurper()
-def crime_data_map = jsonSlurper.parse(jsonFile)
 
-println "Converted Map from file: ${crime_data_map}"
+def crime_data_map
+
+try {
+	crime_data_map = jsonSlurper.parse(jsonFile)
+} catch (Exception e) {
+    log.error("Error parsing JSON", e)
+    return
+}
+
+log.info("Converted Map from file: ${crime_data_map}")
 
 
 def locationsToCheck = [
@@ -28,13 +41,7 @@ locationsToCheck.each { targetLocation ->
 	double targetLongitude = targetLocation[1]
 
 	def crimesWithin1Km = crime_data_map['leicestershire-street'].findAll { crime ->
-		if (crime?.location?.geo?.lat && crime?.location?.geo?.lng) {  // Added null safety
-			double crimeLocationLatitude = extractFirstElementOrValue(crime.location.geo.lat)
-			double crimeLocationLongitude = extractFirstElementOrValue(crime.location.geo.lng)
-			double distance = calculateDistance(targetLatitude, targetLongitude, crimeLocationLatitude, crimeLocationLongitude)
-			return distance <= 1.0  // Only crimes within 1 km
-		}
-		return false
+		crime?.location?.geo?.lat && crime?.location?.geo?.lng && isWithin1Km(targetLatitude, targetLongitude, crime)
 	}
 	
 	crimesWithin1Km.each { crime ->
@@ -46,13 +53,7 @@ locationsToCheck.each { targetLocation ->
 			date: crime?.date ?: 'Unknown'
 		]
 		// Add unique crime by comparing location, latitude, longitude, crime_type and date
-		if (!allCrimes.any { existingCrime ->
-			existingCrime.location == crimeDetails.location &&
-			existingCrime.lat == crimeDetails.lat && 
-			existingCrime.lng == crimeDetails.lng &&
-			existingCrime.crime_type == crimeDetails.crime_type &&
-			existingCrime.date == crimeDetails.date
-		}) {
+		if (!allCrimes.any { existingCrime -> isDuplicate(existingCrime, crimeDetails)}) {
 			allCrimes << [
 				location: crime?.location?.address,
 				lat: crimeDetails.lat,
@@ -78,8 +79,12 @@ def filteredCrimes = allCrimes.collect { crime ->
 def jsonOutput = JsonOutput.toJson(filteredCrimes)
 println "\nAll Filtered Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutput)}"
 
-double extractFirstElementOrValue(def value) {
-	return (value instanceof List) ? value[0] : value
+//To check whether the crime location is near to listed student accommodation logic or not
+boolean isWithin1Km(double targetLatitude, double targetLongitude, crime) {
+	double crimeLocationLatitude = extractFirstElementOrValue(crime.location.geo.lat)
+	double crimeLocationLongitude = extractFirstElementOrValue(crime.location.geo.lng)
+	double distance = calculateDistance(targetLatitude, targetLongitude, crimeLocationLatitude, crimeLocationLongitude)
+	return distance <= 1.0
 }
 
 //Distance on a sphere: The Haversine Formula referred https://community.esri.com/t5/coordinate-reference-systems-blog/distance-on-a-sphere-the-haversine-formula/ba-p/902128 and https://www.movable-type.co.uk/scripts/latlong.html
@@ -92,4 +97,17 @@ double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
 			Math.sin(dLon / 2) * Math.sin(dLon / 2)
 	def c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 	return R * c // Distance in kilometers
+}
+
+double extractFirstElementOrValue(def value) {
+	return (value instanceof List) ? value[0] : value
+}
+
+// To check if the newCrime from other student accommodation location has already been identified and checked to avoid duplication
+boolean isDuplicate(existingCrime, newCrime) {
+	return existingCrime.location == newCrime.location &&
+		   existingCrime.lat == newCrime.lat &&
+		   existingCrime.lng == newCrime.lng &&
+		   existingCrime.crime_type == newCrime.crime_type &&
+		   existingCrime.date == newCrime.date
 }

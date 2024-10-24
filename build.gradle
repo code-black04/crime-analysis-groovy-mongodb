@@ -23,5 +23,7 @@ repositories {
 dependencies {
 	compileOnly 'org.apache.groovy:groovy-all:4.0.6'
 	compileOnly 'org.mongodb:mongodb-driver-sync:4.1.0'
+	compileOnly 'org.slf4j:slf4j-api:1.7.36'
+	compileOnly 'org.slf4j:slf4j-simple:1.7.36'
 }
 
