@@ -71,7 +71,8 @@ def filteredCrimes = allCrimes.collect { crime ->
 	[
 		location: crime?.location,
 		crime_type: crime?.crime_type,
-		last_outcome_category: crime?.last_outcome_category
+		last_outcome_category: crime?.last_outcome_category,
+		date: crime?.date
 	]
 }
 
@@ -111,3 +112,12 @@ boolean isDuplicate(existingCrime, newCrime) {
 		   existingCrime.crime_type == newCrime.crime_type &&
 		   existingCrime.date == newCrime.date
 }
+
+// Data combination
+
+def groupedByLocation = filteredCrimes.groupBy { it.location }
+                                        .collectEntries { location, crimes -> 
+                                            [location, crimes.groupBy { it.crime_type }.collectEntries { crime_type, entries -> [crime_type, entries.size()]}]}
+def jsonOutputGrouped = JsonOutput.toJson(groupedByLocation)
+println "\nAll Grouped Crimes by location and crime type in JSON format:\n${JsonOutput.prettyPrint(jsonOutputGrouped)}"
+
