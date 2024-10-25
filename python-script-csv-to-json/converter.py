@@ -8,8 +8,8 @@ from datetime import datetime
 
 # CONFIG/Constants
 INPUT_FOLDER = "./police_data"
-OUTPUT_FILE = "./police-crime-data.json"
-DATE_START = "2024-07"
+OUTPUT_FILE = "../src/main/resources/police_crime_data_4m.json"
+DATE_START = "2024-05"
 DATE_END = "2024-08"
 
 
@@ -60,6 +60,11 @@ class PoliceDataConverter:
             result[street] = []
 
         for i, row in df.iterrows():
+
+            # Skip rows with missing crime_id
+            if pd.isna(row.get("Crime ID")):
+                continue
+            
             data = {
                 key: value
                 for key, value in {
