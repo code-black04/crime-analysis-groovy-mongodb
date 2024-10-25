@@ -37,7 +37,7 @@
 - **Data Selection**: Select all the crimes in the dataset that happened in the last 4 months.
 - **Data Projection**: Select only the latitude, longitude, crime type, and last outcome category.
 - **Data Filtering**: Filter crimes within a 1 km radius from these locations:
-  - 52.62557255880064, -1.1274648376762608 (IQ accommodation)
+  - 52.632044629016946, -1.1362664313402508 (IQ accommodation)
   - 52.6261360864929, -1.1423652790954384 (The Summit)
   - 52.61957967664474, -1.1350820606701382 (Freemen’s Common)
   - 52.60938312669258, -1.0905735877789204 (The Village)
