@@ -5,6 +5,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 Logger log = LoggerFactory.getLogger(this.class)
 
@@ -22,8 +24,38 @@ try {
     return
 }
 
+
 log.info("Converted Map from file: ${crime_data_map}")
 
+// Selection of Data
+
+def NUM_MONTHS = 4
+def formatter = DateTimeFormatter.ofPattern("yyyy-MM")
+def monthsAgo = LocalDate.now().minusMonths(NUM_MONTHS).format(formatter)
+def selectedCrimes = crime_data_map['leicestershire-street'].collect { it }.findAll { it != null && it.date >= monthsAgo }.sort { a, b -> b.date <=> a.date } 
+def jsonOutputSelected = JsonOutput.toJson(selectedCrimes)
+println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputSelected)}"
+
+
+// Projection of Data
+
+def projectedCrimes = crime_data_map['leicestershire-street'].collect { crime ->
+	if (crime?.location?.geo) {
+		[
+			lat: extractFirstElementOrValue(crime.location.geo.lat),
+			lng: extractFirstElementOrValue(crime.location.geo.lng),
+			crime_type: crime?.crime_type,
+			last_outcome_category: crime?.last_outcome_category
+		]
+	} else {
+		print("Crime object missing location or geo data: $crime")
+		null
+	}
+}.findAll { it != null }
+
+// To print the projectedCrimes after converting to Json
+def jsonOutputProjected = JsonOutput.toJson(projectedCrimes)
+println "\nProjected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputProjected)}"
 
 def locationsToCheck = [
 	[52.632064, -1.136287], //IQ Accommodation
@@ -66,7 +98,8 @@ locationsToCheck.each { targetLocation ->
 	}
 }
 
-//To filter the location, crime_type and last_outcome_category
+
+// Filter of Data
 def filteredCrimes = allCrimes.collect { crime ->
 	[
 		location: crime?.location,
@@ -113,11 +146,10 @@ boolean isDuplicate(existingCrime, newCrime) {
 		   existingCrime.date == newCrime.date
 }
 
-// Data combination
+// Combination of Data
 
 def groupedByLocation = filteredCrimes.groupBy { it.location }
                                         .collectEntries { location, crimes -> 
                                             [location, crimes.groupBy { it.crime_type }.collectEntries { crime_type, entries -> [crime_type, entries.size()]}]}
 def jsonOutputGrouped = JsonOutput.toJson(groupedByLocation)
 println "\nAll Grouped Crimes by location and crime type in JSON format:\n${JsonOutput.prettyPrint(jsonOutputGrouped)}"
-
