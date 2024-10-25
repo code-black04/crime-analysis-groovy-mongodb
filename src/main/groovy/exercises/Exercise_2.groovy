@@ -5,6 +5,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 Logger log = LoggerFactory.getLogger(this.class)
 
@@ -27,7 +29,10 @@ log.info("Converted Map from file: ${crime_data_map}")
 
 // Selection of Data
 
-def selectedCrimes = crime_data_map['leicestershire-street'].collect { it }.findAll { it != null }
+def NUM_MONTHS = 4
+def formatter = DateTimeFormatter.ofPattern("yyyy-MM")
+def monthsAgo = LocalDate.now().minusMonths(NUM_MONTHS).format(formatter)
+def selectedCrimes = crime_data_map['leicestershire-street'].collect { it }.findAll { it != null && it.date >= monthsAgo }.sort { a, b -> b.date <=> a.date } 
 def jsonOutputSelected = JsonOutput.toJson(selectedCrimes)
 println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputSelected)}"
 
@@ -148,4 +153,3 @@ def groupedByLocation = filteredCrimes.groupBy { it.location }
                                             [location, crimes.groupBy { it.crime_type }.collectEntries { crime_type, entries -> [crime_type, entries.size()]}]}
 def jsonOutputGrouped = JsonOutput.toJson(groupedByLocation)
 println "\nAll Grouped Crimes by location and crime type in JSON format:\n${JsonOutput.prettyPrint(jsonOutputGrouped)}"
-

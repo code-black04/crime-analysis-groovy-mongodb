@@ -34,7 +34,7 @@
 
 ## Explanation of Queries
 
-- **Data Selection**: Select all the crimes in the dataset.
+- **Data Selection**: Select all the crimes in the dataset that happened in the last 4 months.
 - **Data Projection**: Select only the latitude, longitude, crime type, and last outcome category.
 - **Data Filtering**: Filter crimes within a 1 km radius from these locations:
   - 52.62557255880064, -1.1274648376762608 (IQ accommodation)
