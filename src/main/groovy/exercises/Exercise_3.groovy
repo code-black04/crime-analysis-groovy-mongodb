@@ -77,5 +77,5 @@ def loadData = { collection, filePath ->
 def col = db.getCollection("police_crime_data")
 
 // DO NOT UNCOMMENT!! (Only required once): Inserts data into collection
-loadData(col, "src/main/resources/police_crime_data.json");
+//loadData(col, "src/main/resources/police_crime_data.json");
 
