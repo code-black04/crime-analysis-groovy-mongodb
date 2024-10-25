@@ -22,8 +22,35 @@ try {
     return
 }
 
+
 log.info("Converted Map from file: ${crime_data_map}")
 
+// Selection of Data
+
+def selectedCrimes = crime_data_map['leicestershire-street'].collect { it }.findAll { it != null }
+def jsonOutputSelected = JsonOutput.toJson(selectedCrimes)
+println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputSelected)}"
+
+
+// Projection of Data
+
+def projectedCrimes = crime_data_map['leicestershire-street'].collect { crime ->
+	if (crime?.location?.geo) {
+		[
+			lat: extractFirstElementOrValue(crime.location.geo.lat),
+			lng: extractFirstElementOrValue(crime.location.geo.lng),
+			crime_type: crime?.crime_type,
+			last_outcome_category: crime?.last_outcome_category
+		]
+	} else {
+		print("Crime object missing location or geo data: $crime")
+		null
+	}
+}.findAll { it != null }
+
+// To print the projectedCrimes after converting to Json
+def jsonOutputProjected = JsonOutput.toJson(projectedCrimes)
+println "\nProjected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputProjected)}"
 
 def locationsToCheck = [
 	[52.632064, -1.136287], //IQ Accommodation
@@ -66,7 +93,8 @@ locationsToCheck.each { targetLocation ->
 	}
 }
 
-//To filter the location, crime_type and last_outcome_category
+
+// Filter of Data
 def filteredCrimes = allCrimes.collect { crime ->
 	[
 		location: crime?.location,
@@ -113,7 +141,7 @@ boolean isDuplicate(existingCrime, newCrime) {
 		   existingCrime.date == newCrime.date
 }
 
-// Data combination
+// Combination of Data
 
 def groupedByLocation = filteredCrimes.groupBy { it.location }
                                         .collectEntries { location, crimes -> 
