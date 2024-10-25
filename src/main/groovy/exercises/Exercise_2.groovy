@@ -146,7 +146,7 @@ boolean isDuplicate(existingCrime, newCrime) {
 		   existingCrime.date == newCrime.date
 }
 
-// Combination of Data
+// Combination & Grouping of Data
 
 def groupedByLocation = filteredCrimes.groupBy { it.location }
                                         .collectEntries { location, crimes -> 
