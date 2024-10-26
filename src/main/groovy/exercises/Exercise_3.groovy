@@ -79,3 +79,23 @@ def col = db.getCollection("police_crime_data")
 // DO NOT UNCOMMENT!! (Only required once): Inserts data into collection
 //loadData(col, "src/main/resources/police_crime_data.json");
 
+//function to print pipeline results
+def printResult(exercise, col, pipeline) {
+	def result = col.aggregate(pipeline).into([])
+	println("----------------------")
+	println("EXERCISE ${exercise}: Selecting data of last four months")
+	result.each { println it }
+}
+// Calculating the date 4 months ago from today
+def fourMonthsAgo = LocalDate.now().minusMonths(4).format(DateTimeFormatter.ofPattern("yyyy-MM"))
+
+//selecting data of latest 4 months
+def pipeline_3 = [
+   
+	match(gte("date", fourMonthsAgo))
+		 		
+]
+
+//printing the result
+printResult(3, col, pipeline_3)
+
