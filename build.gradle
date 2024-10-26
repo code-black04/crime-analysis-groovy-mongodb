@@ -7,7 +7,7 @@ sourceCompatibility = 17
 
 eclipse {
 	project {
-		name 'week13_project'
+		name 'group04-leicester-police-records'
 		buildCommand 'org.eclipse.jdt.core.javabuilder'
 		buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
 		natures 'org.eclipse.jdt.core.javanature',

@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
 Logger log = LoggerFactory.getLogger(this.class)
 
 //To-do: Change the location of json to police_crime_date.json before submitting assignment
-def jsonFile = new File('src/main/resources/testing.json')
+def jsonFile = new File('src/main/resources/police_crime_data.json')
 
 def jsonSlurper = new JsonSlurper()
 
