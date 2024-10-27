@@ -104,7 +104,7 @@ def pipeline_1 = [
 ]
 
 //printing the result
-printResult(1, col, pipeline_1)
+printResult(1, col, pipeline_1, "Selecting data of last four months")
 
 //PROJECTION (latitude,longitude,crime_type,last_outcome_category)
 
@@ -117,7 +117,7 @@ def pipeline_2 = [
 	)
 ]
  
-printResult(2, col, pipeline_2,"Project latitue, longtitude, crime_type and last_outcome_category_of_crimes")
+printResult(2, col, pipeline_2, "Project latitue, longtitude, crime_type and last_outcome_category_of_crimes")
 
 
 //Filtering Query
