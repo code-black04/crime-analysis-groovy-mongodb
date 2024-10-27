@@ -42,8 +42,8 @@ println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputS
 def projectedCrimes = crime_data_map['leicestershire-street'].collect { crime ->
 	if (crime?.location?.geo) {
 		[
-			lat: extractFirstElementOrValue(crime.location.geo.lat),
-			lng: extractFirstElementOrValue(crime.location.geo.lng),
+			lat: ExercisesUtils.extractFirstElementOrValue(crime.location.geo.lat),
+			lng: ExercisesUtils.extractFirstElementOrValue(crime.location.geo.lng),
 			crime_type: crime?.crime_type,
 			last_outcome_category: crime?.last_outcome_category
 		]
