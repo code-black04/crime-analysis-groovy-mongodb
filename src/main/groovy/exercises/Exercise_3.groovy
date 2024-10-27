@@ -202,3 +202,38 @@ locationsToCheck.each { targetLocation ->
 }
 println("\nFilter Query: Find all the crimes happened within 1 km radius of Students Accommodations\n")
 uniqueCrimes.each { println it }
+
+def uniqueCrimesDataCombination = new HashMap()
+
+locationsToCheck.each { targetLocation ->
+	double targetLatitude = targetLocation[0]
+	double targetLongitude = targetLocation[1]
+
+	def pipeline_4 = [
+	    new Document("\$geoNear", new Document()
+	            .append("near", new Document("type", "Point")
+	                    .append("coordinates", [targetLongitude, targetLatitude]))
+	            .append("distanceField", "distance")
+	            .append("maxDistance", 1000)
+	            .append("spherical", true)
+	    ),
+	    project(fields(include("location", "crime_type", "date", "last_outcome_category", "crime_count"),
+	            computed("lat", "\$location.geo.lat"),
+	            computed("lng", "\$location.geo.lng")
+				)),
+	    group(
+			new Document("location", "\$location.address")
+				.append("crime_type", "\$crime_type"),
+			sum("crime_count", 1)
+		)
+	]
+
+	def result = col.aggregate(pipeline_4).into([])
+	 printResult(4, col, pipeline_4,"Testing")
+	// Add only unique crimes to allCrimes
+	result.each { doc ->
+		uniqueCrimesDataCombination.put(doc._id, doc.crime_count)
+	}
+}
+println("\nData combination\n")
+uniqueCrimesDataCombination.each { println it }
