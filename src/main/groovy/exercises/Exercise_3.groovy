@@ -112,9 +112,8 @@ def locationsToCheck = ExercisesUtils.STUDENTS_ACCOMMODATIONS_LOCATIONS_TO_CHECK
 def allCrimes = []
 
 //DO NOT UNCOMMENT!! (Only required once): To give "Point" type to geo.lat and geo.lng
-
 //To perform indexing on location.geo
-col.createIndex(new Document("location.geo", "2dsphere"))
+/*col.createIndex(new Document("location.geo", "2dsphere"))
 def batchSize = 100
 def lastId = null
 def documents = []
@@ -141,7 +140,7 @@ while (true) {
 	}
 }
 
-log.info("Process completed to have geo object of Type as Point")
+log.info("Process completed to have geo object of Type as Point")*/
 
 //To have set of unique crimes happening
 def uniqueCrimes = new HashSet<>()
