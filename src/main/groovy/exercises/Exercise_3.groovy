@@ -86,24 +86,38 @@ def col = db.getCollection("police_crime_data")
 //loadData(col, "src/main/resources/police_crime_data.json");
 
 //function to print pipeline results
-def printResult(exercise, col, pipeline) {
+def printResult(exercise, col, pipeline,querydefinition) {
 	def result = col.aggregate(pipeline).into([])
 	println("----------------------")
-	println("EXERCISE ${exercise}: Selecting data of last four months")
+	println("EXERCISE ${exercise}: ${querydefinition}")
 	result.each { println it }
 }
+
 // Calculating the date 4 months ago from today
 def fourMonthsAgo = LocalDate.now().minusMonths(4).format(DateTimeFormatter.ofPattern("yyyy-MM"))
 
 //selecting data of latest 4 months
-def pipeline_3 = [
+def pipeline_1 = [
    
 	match(gte("date", fourMonthsAgo))
 		 		
 ]
 
 //printing the result
-printResult(3, col, pipeline_3)
+printResult(1, col, pipeline_1)
+
+//PROJECTION (latitude,longitude,crime_type,last_outcome_category)
+
+def pipeline_2 = [
+	project(new Document()
+		.append("lat", new Document("\$arrayElemAt", ["\$location.geo.coordinates", 1]))
+		.append("lng", new Document("\$arrayElemAt", ["\$location.geo.coordinates", 0]))
+		.append("crime_type", 1)
+		.append("last_outcome_category", 1)
+	)
+]
+ 
+printResult(2, col, pipeline_2,"Project latitue, longtitude, crime_type and last_outcome_category_of_crimes")
 
 
 //Filtering Query
@@ -149,7 +163,7 @@ locationsToCheck.each { targetLocation ->
 	double targetLatitude = targetLocation[0]
 	double targetLongitude = targetLocation[1]
 
-	def pipeline = [
+	def pipeline_3 = [
 			new Document("\$geoNear", new Document()
 					.append("near", new Document("type", "Point")
 							.append("coordinates", [targetLongitude, targetLatitude]))
@@ -175,7 +189,7 @@ locationsToCheck.each { targetLocation ->
 			)
 	]
 
-	def result = col.aggregate(pipeline).into([])
+	def result = col.aggregate(pipeline_3).into([])
 	// Add only unique crimes to allCrimes
 	result.each { doc ->
 		def uniqueKey = "${doc._id}"
