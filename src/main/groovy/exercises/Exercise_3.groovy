@@ -87,13 +87,13 @@ def printResult(exercise, col, pipeline) {
 	result.each { println it }
 }
 // Calculating the date 4 months ago from today
-def fourMonthsAgo = LocalDate.now().minusMonths(4).format(DateTimeFormatter.ofPattern("yyyy-MM"))
+def numberOfMonths = 4
+def dateFormat = DateTimeFormatter.ofPattern("yyyy-MM")
+def fourMonthsAgo = LocalDate.now().minusMonths(numberOfMonths).format(dateFormat)
 
-//selecting data of latest 4 months
-def pipeline_3 = [
-   
-	match(gte("date", fourMonthsAgo))
-		 		
+//Pipeline to get the data of last four months
+def pipeline_3 = [  
+	match(gte("date", fourMonthsAgo))		 		
 ]
 
 //printing the result
