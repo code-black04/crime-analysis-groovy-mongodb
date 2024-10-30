@@ -84,6 +84,7 @@ def col = db.getCollection("police_crime_data")
 
 // DO NOT UNCOMMENT!! (Only required once): Inserts data into collection
 //loadData(col, "src/main/resources/police_crime_data.json");
+//return;
 
 //function to print pipeline results
 def printResult(exercise, col, pipeline,querydefinition) {
@@ -93,6 +94,23 @@ def printResult(exercise, col, pipeline,querydefinition) {
 	result.each { println it }
 }
 
+def measureExecutionTimeAndMemory(Logger log, col, String operationName,Closure pipelineClosure) {
+	//	Check mem ref: https://gist.github.com/jhoblitt/21f46d853fee9b70be8c2e5873d2e621
+	def startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+	def startTime = System.currentTimeMillis()
+	
+	// Execute...
+	def result = pipelineClosure()
+	
+	def endTime = System.currentTimeMillis()
+	def endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+	
+	log.info("$operationName Execution Time: ${(endTime - startTime)} ms")
+	log.info("$operationName Memory Usage: ${(endMemory - startMemory) / (1024 * 1024)} MB")
+	
+	return result
+}
+
 // Calculating the date 4 months ago from today
 def numberOfMonths = 4
 def dateFormat = DateTimeFormatter.ofPattern("yyyy-MM")
@@ -100,12 +118,15 @@ def fourMonthsAgo = LocalDate.now().minusMonths(numberOfMonths).format(dateForma
 
 
 //Pipeline to get the data of last four months
-def pipeline_3 = [  
-	match(gte("date", fourMonthsAgo))		 		
+def pipeline_1 = [  
+//	match(gte("date", fourMonthsAgo))
+	match(new Document())	// Select all data	 		
 ]
-
+measureExecutionTimeAndMemory(log, col, "Data selection") {
+	col.aggregate(pipeline_1).into([])
+}
 //printing the result
-printResult(1, col, pipeline_1, "Selecting data of last four months")
+//printResult(1, col, pipeline_1, "Selecting data of last four months")
 
 //PROJECTION (latitude,longitude,crime_type,last_outcome_category)
 
@@ -117,8 +138,10 @@ def pipeline_2 = [
 		.append("last_outcome_category", 1)
 	)
 ]
- 
-printResult(2, col, pipeline_2, "Project latitue, longtitude, crime_type and last_outcome_category_of_crimes")
+measureExecutionTimeAndMemory(log, col, "Data projection") {
+	col.aggregate(pipeline_2).into([])
+}
+//printResult(2, col, pipeline_2, "Project latitue, longtitude, crime_type and last_outcome_category_of_crimes")
 
 
 //Filtering Query
@@ -128,113 +151,119 @@ def allCrimes = []
 
 //DO NOT UNCOMMENT!! (Only required once): To give "Point" type to geo.lat and geo.lng
 //To perform indexing on location.geo
-/*col.createIndex(new Document("location.geo", "2dsphere"))
-def batchSize = 100
-def lastId = null
-def documents = []
-
-while (true) {
-	def query = lastId ? new Document("_id", new Document("\$gt", lastId)) : new Document()
-	documents = col.find(query).sort(new Document("_id", 1)).limit(batchSize).into([])
-
-	if (documents.isEmpty()) break
-
-	documents.each { doc ->
-		def lat = doc.get("location")?.get("geo")?.get("lat")
-		def lng = doc.get("location")?.get("geo")?.get("lng")
-
-		if (lat && lng) {
-			def geoJsonPoint = new Document("type", "Point").append("coordinates", [lng, lat])
-			col.updateOne(
-					new Document("_id", doc.get("_id")),
-					new Document("\$set", new Document("location.geo", geoJsonPoint))
-			)
-			log.info("Updated document with _id: ${doc.get("_id")}")
-		}
-		lastId = doc.get("_id")
-	}
-}
-
-log.info("Process completed to have geo object of Type as Point")*/
+//col.createIndex(new Document("location.geo", "2dsphere"))
+//def batchSize = 100
+//def lastId = null
+//def documents = []
+//long startGeoToPointTime = System.currentTimeMillis()
+//
+//while (true) {
+//	def query = lastId ? new Document("_id", new Document("\$gt", lastId)) : new Document()
+//	documents = col.find(query).sort(new Document("_id", 1)).limit(batchSize).into([])
+//
+//	if (documents.isEmpty()) break
+//
+//	documents.each { doc ->
+//		def lat = doc.get("location")?.get("geo")?.get("lat")
+//		def lng = doc.get("location")?.get("geo")?.get("lng")
+//
+//		if (lat && lng) {
+//			def geoJsonPoint = new Document("type", "Point").append("coordinates", [lng, lat])
+//			col.updateOne(
+//					new Document("_id", doc.get("_id")),
+//					new Document("\$set", new Document("location.geo", geoJsonPoint))
+//			)
+//			log.info("Updated document with _id: ${doc.get("_id")}")
+//		}
+//		lastId = doc.get("_id")
+//	}
+//}
+//log.info("Geo obj to Point Execution Time: ${(System.currentTimeMillis() - startGeoToPointTime) / 1000.0} seconds")
+//log.info("Process completed to have geo object of Type as Point")
+//return;
 
 //To have set of unique crimes happening
 def uniqueCrimes = new HashSet<>()
 
-locationsToCheck.each { targetLocation ->
-	double targetLatitude = targetLocation[0]
-	double targetLongitude = targetLocation[1]
-
-	def pipeline_3 = [
-			new Document("\$geoNear", new Document()
-					.append("near", new Document("type", "Point")
-							.append("coordinates", [targetLongitude, targetLatitude]))
-					.append("distanceField", "distance")
-					.append("maxDistance", 1000)
-					.append("spherical", true)
-			),
-			project(fields(include("location", "crime_type", "date", "last_outcome_category"),
-					computed("lat", "\$location.geo.lat"),
-					computed("lng", "\$location.geo.lng"))),
-			group(
-					new Document("location", "\$location.address")
-							.append("lat", "\$lat")
-							.append("lng", "\$lng")
-							.append("crime_type", "\$crime_type")
-							.append("date", "\$date"),
-					first("location", "\$location.address"),
-					first("lat", "\$lat"),
-					first("lng", "\$lng"),
-					first("crime_type", "\$crime_type"),
-					first("date", "\$date"),
-					first("last_outcome_category", "\$last_outcome_category")
-			)
-	]
-
-	def result = col.aggregate(pipeline_3).into([])
-	// Add only unique crimes to allCrimes
-	result.each { doc ->
-		def uniqueKey = "${doc._id}"
-		if (!uniqueCrimes.contains(uniqueKey)) {
-			uniqueCrimes.add(uniqueKey)
-			// Add to allCrimes if unique
-			allCrimes << doc
-		}
+measureExecutionTimeAndMemory(log, col, "Data Filtering") {
+	locationsToCheck.each { targetLocation ->
+		double targetLatitude = targetLocation[0]
+		double targetLongitude = targetLocation[1]
+	
+		def pipeline_3 = [
+				new Document("\$geoNear", new Document()
+						.append("near", new Document("type", "Point")
+								.append("coordinates", [targetLongitude, targetLatitude]))
+						.append("distanceField", "distance")
+						.append("maxDistance", 1000)
+						.append("spherical", true)
+				),
+				project(fields(include("location", "crime_type", "date", "last_outcome_category"),
+						computed("lat", "\$location.geo.lat"),
+						computed("lng", "\$location.geo.lng"))),
+				group(
+						new Document("location", "\$location.address")
+								.append("lat", "\$lat")
+								.append("lng", "\$lng")
+								.append("crime_type", "\$crime_type")
+								.append("date", "\$date"),
+						first("location", "\$location.address"),
+						first("lat", "\$lat"),
+						first("lng", "\$lng"),
+						first("crime_type", "\$crime_type"),
+						first("date", "\$date"),
+						first("last_outcome_category", "\$last_outcome_category")
+				)
+		]
+	
+		def result = col.aggregate(pipeline_3).into([])
+		// Add only unique crimes to allCrimes
+//		result.each { doc ->
+//			def uniqueKey = "${doc._id}"
+//			if (!uniqueCrimes.contains(uniqueKey)) {
+//				uniqueCrimes.add(uniqueKey)
+//				// Add to allCrimes if unique
+//				allCrimes << doc
+//			}
+//		}
 	}
 }
-println("\nFilter Query: Find all the crimes happened within 1 km radius of Students Accommodations\n")
-uniqueCrimes.each { println it }
+//println("\nFilter Query: Find all the crimes happened within 1 km radius of Students Accommodations\n")
+//uniqueCrimes.each { println it }
 
 def uniqueCrimesDataCombination = new HashMap()
 
-locationsToCheck.each { targetLocation ->
-	double targetLatitude = targetLocation[0]
-	double targetLongitude = targetLocation[1]
-
-	def pipeline_4 = [
-	    new Document("\$geoNear", new Document()
-	            .append("near", new Document("type", "Point")
-	                    .append("coordinates", [targetLongitude, targetLatitude]))
-	            .append("distanceField", "distance")
-	            .append("maxDistance", 1000)
-	            .append("spherical", true)
-	    ),
-	    project(fields(include("location", "crime_type", "date", "last_outcome_category", "crime_count"),
-	            computed("lat", "\$location.geo.lat"),
-	            computed("lng", "\$location.geo.lng")
-				)),
-	    group(
-			new Document("location", "\$location.address")
-				.append("crime_type", "\$crime_type"),
-			sum("crime_count", 1)
-		)
-	]
-
-	def result = col.aggregate(pipeline_4).into([])
-	 printResult(4, col, pipeline_4,"Testing")
-	// Add only unique crimes to allCrimes
-	result.each { doc ->
-		uniqueCrimesDataCombination.put(doc._id, doc.crime_count)
+measureExecutionTimeAndMemory(log, col, "Data Combination and Grouping") {
+	locationsToCheck.each { targetLocation ->
+		double targetLatitude = targetLocation[0]
+		double targetLongitude = targetLocation[1]
+	
+		def pipeline_4 = [
+		    new Document("\$geoNear", new Document()
+		            .append("near", new Document("type", "Point")
+		                    .append("coordinates", [targetLongitude, targetLatitude]))
+		            .append("distanceField", "distance")
+		            .append("maxDistance", 1000)
+		            .append("spherical", true)
+		    ),
+		    project(fields(include("location", "crime_type", "date", "last_outcome_category", "crime_count"),
+		            computed("lat", "\$location.geo.lat"),
+		            computed("lng", "\$location.geo.lng")
+					)),
+		    group(
+				new Document("location", "\$location.address")
+					.append("crime_type", "\$crime_type"),
+				sum("crime_count", 1)
+			)
+		]
+	
+		def result = col.aggregate(pipeline_4).into([])
+	//	 printResult(4, col, pipeline_4,"Testing")
+		// Add only unique crimes to allCrimes
+//		result.each { doc ->
+//			uniqueCrimesDataCombination.put(doc._id, doc.crime_count)
+//		}
 	}
 }
-println("\nData combination\n")
-uniqueCrimesDataCombination.each { println it }
+//println("\nData combination\n")
+//uniqueCrimesDataCombination.each { println it }
