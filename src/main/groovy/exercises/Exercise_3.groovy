@@ -93,6 +93,7 @@ def printResult(exercise, col, pipeline,querydefinition) {
 	result.each { println it }
 }
 
+//SELECTION QUERY
 // Calculating the date 4 months ago from today
 def numberOfMonths = 4
 def dateFormat = DateTimeFormatter.ofPattern("yyyy-MM")
@@ -100,7 +101,7 @@ def fourMonthsAgo = LocalDate.now().minusMonths(numberOfMonths).format(dateForma
 
 
 //Pipeline to get the data of last four months
-def pipeline_3 = [  
+def pipeline_1 = [  
 	match(gte("date", fourMonthsAgo))		 		
 ]
 
@@ -118,17 +119,15 @@ def pipeline_2 = [
 	)
 ]
  
-printResult(2, col, pipeline_2, "Project latitue, longtitude, crime_type and last_outcome_category_of_crimes")
+printResult(2, col, pipeline_2, "Project latitude, longitude, crime_type and last_outcome_category_of_crimes")
 
 
-//Filtering Query
-def locationsToCheck = ExercisesUtils.STUDENTS_ACCOMMODATIONS_LOCATIONS_TO_CHECK
+// FILTERING QUERY
 
-def allCrimes = []
-
+/**
 //DO NOT UNCOMMENT!! (Only required once): To give "Point" type to geo.lat and geo.lng
 //To perform indexing on location.geo
-/*col.createIndex(new Document("location.geo", "2dsphere"))
+//col.createIndex(new Document("location.geo", "2dsphere"))
 def batchSize = 100
 def lastId = null
 def documents = []
@@ -155,11 +154,16 @@ while (true) {
 	}
 }
 
-log.info("Process completed to have geo object of Type as Point")*/
+log.info("Process completed to have geo object of Type as Point")
+*/
 
-//To have set of unique crimes happening
+def locationsToCheck = ExercisesUtils.STUDENTS_ACCOMMODATIONS_LOCATIONS_TO_CHECK
+def allCrimes = []
+
+// To have set of unique crimes happening
 def uniqueCrimes = new HashSet<>()
 
+// Iterate over each student's accommodation locations
 locationsToCheck.each { targetLocation ->
 	double targetLatitude = targetLocation[0]
 	double targetLongitude = targetLocation[1]
@@ -180,6 +184,7 @@ locationsToCheck.each { targetLocation ->
 							.append("lat", "\$lat")
 							.append("lng", "\$lng")
 							.append("crime_type", "\$crime_type")
+							.append("last_outcome_category", "\$last_outcome_category")
 							.append("date", "\$date"),
 					first("location", "\$location.address"),
 					first("lat", "\$lat"),
@@ -203,6 +208,8 @@ locationsToCheck.each { targetLocation ->
 }
 println("\nFilter Query: Find all the crimes happened within 1 km radius of Students Accommodations\n")
 uniqueCrimes.each { println it }
+
+// COMBINATION AND GROUPING QUERY
 
 def uniqueCrimesDataCombination = new HashMap()
 
