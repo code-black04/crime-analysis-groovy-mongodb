@@ -94,22 +94,47 @@ def printResult(exercise, col, pipeline,querydefinition) {
 	result.each { println it }
 }
 
+
+
 def measureExecutionTimeAndMemory(Logger log, col, String operationName,Closure pipelineClosure) {
-	//	Check mem ref: https://gist.github.com/jhoblitt/21f46d853fee9b70be8c2e5873d2e621
-	def startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
-	def startTime = System.currentTimeMillis()
+	def measureCount = 3;  // Repetition count for getting average time and memory usage
 	
-	// Execute...
-	def result = pipelineClosure()
+	long totalExecutionTime = 0;
+	long totalMemoryUsage = 0;
 	
-	def endTime = System.currentTimeMillis()
-	def endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+	def result;
+	measureCount.times {
+		//	Check mem ref: https://gist.github.com/jhoblitt/21f46d853fee9b70be8c2e5873d2e621
+		def startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+		def startTime = System.currentTimeMillis()
+		
+		// Execute...
+		result = pipelineClosure()
+
+		def endTime = System.currentTimeMillis()
+		def endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+		
+		totalExecutionTime += (endTime - startTime)
+		totalMemoryUsage += (endMemory - startMemory)
+	}
 	
-	log.info("$operationName Execution Time: ${(endTime - startTime)} ms")
-	log.info("$operationName Memory Usage: ${(endMemory - startMemory) / (1024 * 1024)} MB")
+	def avgExeTime = totalExecutionTime / measureCount;
+	def avgMemUsage = totalMemoryUsage / measureCount / (1024 * 1024)
+	
+	
+//	log.info("$operationName Execution Time: ${(endTime - startTime)} ms")
+//	log.info("$operationName Memory Usage: ${(endMemory - startMemory) / (1024 * 1024)} MB")
+	log.info("$operationName Avg Execution Time: ${avgExeTime} ms")
+	log.info("$operationName Avg Memory USage: ${avgMemUsage} MB")
+	
 	
 	return result
 }
+
+// Pagination
+def pageSize = 100
+def pageNumber = 1
+
 
 // Calculating the date 4 months ago from today
 def numberOfMonths = 4
@@ -119,14 +144,17 @@ def fourMonthsAgo = LocalDate.now().minusMonths(numberOfMonths).format(dateForma
 
 //Pipeline to get the data of last four months
 def pipeline_1 = [  
-//	match(gte("date", fourMonthsAgo))
-	match(new Document())	// Select all data	 		
+	match(gte("date", fourMonthsAgo)),
+//	match(new Document()),	// Select all data	
+	skip((pageNumber - 1) * pageSize),
+	limit(pageSize) 		
 ]
 measureExecutionTimeAndMemory(log, col, "Data selection") {
 	col.aggregate(pipeline_1).into([])
 }
 //printing the result
 //printResult(1, col, pipeline_1, "Selecting data of last four months")
+
 
 //PROJECTION (latitude,longitude,crime_type,last_outcome_category)
 
@@ -136,7 +164,9 @@ def pipeline_2 = [
 		.append("lng", new Document("\$arrayElemAt", ["\$location.geo.coordinates", 0]))
 		.append("crime_type", 1)
 		.append("last_outcome_category", 1)
-	)
+	),
+	skip((pageNumber - 1) * pageSize),
+	limit(pageSize)
 ]
 measureExecutionTimeAndMemory(log, col, "Data projection") {
 	col.aggregate(pipeline_2).into([])
@@ -179,6 +209,9 @@ measureExecutionTimeAndMemory(log, col, "Data projection") {
 //log.info("Process completed to have geo object of Type as Point")
 //return;
 
+def locationsToCheck = ExercisesUtils.STUDENTS_ACCOMMODATIONS_LOCATIONS_TO_CHECK
+def allCrimes = []
+
 // To have set of unique crimes happening
 def uniqueCrimes = new HashSet<>()
 
@@ -204,7 +237,7 @@ measureExecutionTimeAndMemory(log, col, "Data Filtering") {
 								.append("lat", "\$lat")
 								.append("lng", "\$lng")
 								.append("crime_type", "\$crime_type")
-							.append("last_outcome_category", "\$last_outcome_category")
+								.append("last_outcome_category", "\$last_outcome_category")
 								.append("date", "\$date"),
 						first("location", "\$location.address"),
 						first("lat", "\$lat"),
@@ -212,7 +245,9 @@ measureExecutionTimeAndMemory(log, col, "Data Filtering") {
 						first("crime_type", "\$crime_type"),
 						first("date", "\$date"),
 						first("last_outcome_category", "\$last_outcome_category")
-				)
+				),
+				skip((pageNumber - 1) * pageSize),
+				limit(pageSize),
 		]
 	
 		def result = col.aggregate(pipeline_3).into([])
@@ -255,7 +290,9 @@ measureExecutionTimeAndMemory(log, col, "Data Combination and Grouping") {
 				new Document("location", "\$location.address")
 					.append("crime_type", "\$crime_type"),
 				sum("crime_count", 1)
-			)
+			),
+			skip((pageNumber - 1) * pageSize),
+			limit(pageSize)
 		]
 	
 		def result = col.aggregate(pipeline_4).into([])
