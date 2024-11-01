@@ -141,13 +141,10 @@ def pipeline_2 = [
 measureExecutionTimeAndMemory(log, col, "Data projection") {
 	col.aggregate(pipeline_2).into([])
 }
-//printResult(2, col, pipeline_2, "Project latitue, longtitude, crime_type and last_outcome_category_of_crimes")
+//printResult(2, col, pipeline_2, "Project latitude, longitude, crime_type and last_outcome_category_of_crimes")
 
 
-//Filtering Query
-def locationsToCheck = ExercisesUtils.STUDENTS_ACCOMMODATIONS_LOCATIONS_TO_CHECK
-
-def allCrimes = []
+// FILTERING QUERY
 
 //DO NOT UNCOMMENT!! (Only required once): To give "Point" type to geo.lat and geo.lng
 //To perform indexing on location.geo
@@ -182,9 +179,10 @@ def allCrimes = []
 //log.info("Process completed to have geo object of Type as Point")
 //return;
 
-//To have set of unique crimes happening
+// To have set of unique crimes happening
 def uniqueCrimes = new HashSet<>()
 
+// Iterate over each student's accommodation locations
 measureExecutionTimeAndMemory(log, col, "Data Filtering") {
 	locationsToCheck.each { targetLocation ->
 		double targetLatitude = targetLocation[0]
@@ -206,6 +204,7 @@ measureExecutionTimeAndMemory(log, col, "Data Filtering") {
 								.append("lat", "\$lat")
 								.append("lng", "\$lng")
 								.append("crime_type", "\$crime_type")
+							.append("last_outcome_category", "\$last_outcome_category")
 								.append("date", "\$date"),
 						first("location", "\$location.address"),
 						first("lat", "\$lat"),
@@ -230,6 +229,8 @@ measureExecutionTimeAndMemory(log, col, "Data Filtering") {
 }
 //println("\nFilter Query: Find all the crimes happened within 1 km radius of Students Accommodations\n")
 //uniqueCrimes.each { println it }
+
+// COMBINATION AND GROUPING QUERY
 
 def uniqueCrimesDataCombination = new HashMap()
 
