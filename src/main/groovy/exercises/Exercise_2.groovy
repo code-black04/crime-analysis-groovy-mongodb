@@ -28,7 +28,6 @@ def measureExecutionTimeAndMemory(Logger log, String operationName, Closure oper
 	return result
 }
 
-//To-do: Change the location of json to police_crime_date.json before submitting assignment
 def jsonFile = new File('src/main/resources/police_crime_data.json')
 
 def jsonSlurper = new JsonSlurper()
@@ -58,7 +57,7 @@ def selectedCrimes = measureExecutionTimeAndMemory(log, "Data Selection") {
 }
 
 def jsonOutputSelected = JsonOutput.toJson(selectedCrimes)
-//println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputSelected)}"
+println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputSelected)}"
 
 
 // Projection of Data
@@ -80,7 +79,7 @@ def projectedCrimes = measureExecutionTimeAndMemory(log, "Data Projection") {
 
 // To print the projectedCrimes after converting to Json
 def jsonOutputProjected = JsonOutput.toJson(projectedCrimes)
-//println "\nProjected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputProjected)}"
+println "\nProjected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputProjected)}"
 
 
 //To filter the crime data happened within 1km of radius of Students Accommodations
@@ -123,7 +122,7 @@ def filteredCrimes = measureExecutionTimeAndMemory(log, "Data Filtering") {
 
 //To print the filteredCrimes after converting to Json
 def jsonOutput = JsonOutput.toJson(filteredCrimes)
-//println "\nAll Filtered Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutput)}"
+println "\nAll Filtered Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutput)}"
 
 
 // Combination & Grouping of Data
@@ -140,4 +139,4 @@ def groupedByLocation = measureExecutionTimeAndMemory(log, "Data Combination and
 		}
 }
 def jsonOutputGrouped = JsonOutput.toJson(groupedByLocation)
-//println "\nAll Grouped Crimes by location and crime type in JSON format:\n${JsonOutput.prettyPrint(jsonOutputGrouped)}"
+println "\nAll Grouped Crimes by location and crime type in JSON format:\n${JsonOutput.prettyPrint(jsonOutputGrouped)}"

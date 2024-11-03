@@ -97,7 +97,7 @@ def printResult(exercise, col, pipeline,querydefinition) {
 
 
 def measureExecutionTimeAndMemory(Logger log, col, String operationName,Closure pipelineClosure) {
-	def measureCount = 3;  // Repetition count for getting average time and memory usage
+	def measureCount = 1;  // Repetition count for getting average time and memory usage
 	
 	long totalExecutionTime = 0;
 	long totalMemoryUsage = 0;
@@ -120,10 +120,7 @@ def measureExecutionTimeAndMemory(Logger log, col, String operationName,Closure 
 	
 	def avgExeTime = totalExecutionTime / measureCount;
 	def avgMemUsage = totalMemoryUsage / measureCount / (1024 * 1024)
-	
-	
-//	log.info("$operationName Execution Time: ${(endTime - startTime)} ms")
-//	log.info("$operationName Memory Usage: ${(endMemory - startMemory) / (1024 * 1024)} MB")
+
 	log.info("$operationName Avg Execution Time: ${avgExeTime} ms")
 	log.info("$operationName Avg Memory USage: ${avgMemUsage} MB")
 	
@@ -132,7 +129,7 @@ def measureExecutionTimeAndMemory(Logger log, col, String operationName,Closure 
 }
 
 // Pagination
-def pageSize = 100
+def pageSize = 50
 def pageNumber = 1
 
 
@@ -153,11 +150,10 @@ measureExecutionTimeAndMemory(log, col, "Data selection") {
 	col.aggregate(pipeline_1).into([])
 }
 //printing the result
-//printResult(1, col, pipeline_1, "Selecting data of last four months")
+printResult(1, col, pipeline_1, "Selecting data of last four months")
 
 
 //PROJECTION (latitude,longitude,crime_type,last_outcome_category)
-
 def pipeline_2 = [
 	project(new Document()
 		.append("lat", new Document("\$arrayElemAt", ["\$location.geo.coordinates", 1]))
@@ -171,7 +167,7 @@ def pipeline_2 = [
 measureExecutionTimeAndMemory(log, col, "Data projection") {
 	col.aggregate(pipeline_2).into([])
 }
-//printResult(2, col, pipeline_2, "Project latitude, longitude, crime_type and last_outcome_category_of_crimes")
+printResult(2, col, pipeline_2, "Project latitude, longitude, crime_type and last_outcome_category_of_crimes")
 
 
 // FILTERING QUERY
@@ -252,21 +248,21 @@ measureExecutionTimeAndMemory(log, col, "Data Filtering") {
 	
 		def result = col.aggregate(pipeline_3).into([])
 		// Add only unique crimes to allCrimes
-//		result.each { doc ->
-//			def uniqueKey = "${doc._id}"
-//			if (!uniqueCrimes.contains(uniqueKey)) {
-//				uniqueCrimes.add(uniqueKey)
-//				// Add to allCrimes if unique
-//				allCrimes << doc
-//			}
-//		}
+		result.each { doc ->
+			def uniqueKey = "${doc._id}"
+			if (!uniqueCrimes.contains(uniqueKey)) {
+				uniqueCrimes.add(uniqueKey)
+				// Add to allCrimes if unique
+				allCrimes << doc
+			}
+		}
 	}
 }
-//println("\nFilter Query: Find all the crimes happened within 1 km radius of Students Accommodations\n")
-//uniqueCrimes.each { println it }
+println("\nFilter Query: Find all the crimes happened within 1 km radius of Students Accommodations\n")
+uniqueCrimes.each { println it }
+
 
 // COMBINATION AND GROUPING QUERY
-
 def uniqueCrimesDataCombination = new HashMap()
 
 measureExecutionTimeAndMemory(log, col, "Data Combination and Grouping") {
@@ -296,12 +292,12 @@ measureExecutionTimeAndMemory(log, col, "Data Combination and Grouping") {
 		]
 	
 		def result = col.aggregate(pipeline_4).into([])
-	//	 printResult(4, col, pipeline_4,"Testing")
+		printResult(4, col, pipeline_4,"Testing")
 		// Add only unique crimes to allCrimes
-//		result.each { doc ->
-//			uniqueCrimesDataCombination.put(doc._id, doc.crime_count)
-//		}
+		result.each { doc ->
+			uniqueCrimesDataCombination.put(doc._id, doc.crime_count)
+		}
 	}
 }
-//println("\nData combination\n")
-//uniqueCrimesDataCombination.each { println it }
+println("\nData combination\n")
+uniqueCrimesDataCombination.each { println it }
