@@ -5,64 +5,45 @@ In this a Groovy script is implemented to analyze crime data stored in MongoDB. 
 **Prerequisites**
 - MongoDB Atlas cluster (or a MongoDB instance)
 - Groovy for scripting
-- JSON file containing crime data
+- JSON file containing crime data to load
 - A properties file (mongodb.properties) with MongoDB credentials
 ---
 
 ### Mongo Db Connectivity and Load file
 The script begins by establishing a connection to MongoDB, loading credentials from a properties file, and using them to securely connect to the database. Data is then loaded into the specified MongoDB collection from a JSON file, ensuring a refreshed data set by deleting any existing documents in the collection.
 
-**Code**
+**Key Code Snippet Highlights**
 
 ```groovy
-// Load credentials from src/main/resources/mongodb.properties
+// Load credentials from properties file
 def properties = new Properties()
-def propertiesFile = new File('src/main/resources/mongodb.properties')
-propertiesFile.withInputStream {
-	properties.load(it)
-}
+new File('src/main/resources/mongodb.properties').withInputStream { properties.load(it) }
 
-// Create MongoDB connection
+// MongoDB connection setup
 def mongoClient = MongoClients.create("mongodb+srv://${properties.USN}:${properties.PWD}@${properties.CLUSTER}.${properties.SERVER}.mongodb.net/${properties.DB}?retryWrites=true&w=majority")
 def db = mongoClient.getDatabase(properties.DB)
 
-// Load data into mongoDB
+// Data load function
 def loadData = { collection, filePath ->
-	collection.deleteMany(new Document()) // reset collection
-	def jsonFile = new File(filePath)
-	def jsonSlurper = new JsonSlurper()
-	
-	try {
-		def crimeDataMap = jsonSlurper.parse(jsonFile)
-		def insertDocuments = []
-		
-		log.info("Creating docs...")
-		long startDocCreateTime = System.currentTimeMillis()
-		crimeDataMap.each { street, crimes ->
-			crimes.each { crime ->
-				def doc = Document.parse(JsonOutput.toJson(crime))
-				doc.put("street", street) // Insert area as a separate field
-				insertDocuments << doc
-			}
-		}
-		log.info("Documents created in ${(System.currentTimeMillis() - startDocCreateTime) / 1000.0} seconds")
-		
-		if (!insertDocuments.isEmpty()) {
-			log.info("Loading docs into mongodb... please wait.")
-			long startDBInsertTime = System.currentTimeMillis()
-			
-			collection.insertMany(insertDocuments)
-			log.info("${insertDocuments.size()} documents loaded in ${(System.currentTimeMillis() - startDBInsertTime) / 1000.0} seconds.")
-		} else {
-			log.info("No Documents to insert..")
-		}
-		
-	} catch (Exception e) {
-		log.error("Error loading crime data: ", e)
-		// System/Script exit here: do not proceed...
-	}
+    collection.deleteMany(new Document()) // Reset collection
+    def jsonFile = new File(filePath)
+    def crimeDataMap = new JsonSlurper().parse(jsonFile)
+
+    def insertDocuments = []
+    crimeDataMap.each { street, crimes ->
+        crimes.each { crime ->
+            def doc = Document.parse(JsonOutput.toJson(crime))
+            doc.put("street", street) // Add street field
+            insertDocuments << doc
+        }
+    }
+
+    collection.insertMany(insertDocuments) // Insert data into MongoDB
+    println "${insertDocuments.size()} documents loaded."
+
+    // Add exception handling and logging if needed for error management
 }
-def col = db.getCollection("police_crime_data")
+
 ```
 
 **Outcome**: The collection is populated with documents from the provided JSON file.
@@ -70,54 +51,50 @@ def col = db.getCollection("police_crime_data")
 ---
 
 ### Selection Query
-Query Definition: Selection of crimes in the last 4 months.​
+**Query Definition:** Selection of crimes in the last 4 months.​
 
-**Code**
+The selection query extracts records of crimes reported within the last four months. The script calculates the date threshold by subtracting four months from the current date and uses this date as a filter criterion in the query.  The selected crimes are then displayed in JSON format, providing a structured overview of recent crimes.
+
+**Key Code Snippet Highlights** & for **Outcome:** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/ESjYhXgkUVVGvJp7mlhnQ6wBxgaairRs-bII68Wn6ehqUQ?e=Bqlbqt)
 ```groovy
 // Calculating the date 4 months ago from today
-def numberOfMonths = 4
-def dateFormat = DateTimeFormatter.ofPattern("yyyy-MM")
-def fourMonthsAgo = LocalDate.now().minusMonths(numberOfMonths).format(dateFormat)
-
-//Pipeline to get the data of last four months
-def pipeline_1 = [  
-	match(gte("date", fourMonthsAgo)),
-//	match(new Document()),	// Select all data	
-	skip((pageNumber - 1) * pageSize),
-	limit(pageSize) 		
+// Define a date threshold by calculating the date 4 months ago
+def fourMonthsAgo = LocalDate.now().minusMonths(4).format(DateTimeFormatter.ofPattern("yyyy-MM"))
+def pipeline_1 = [
+    match(gte("date", fourMonthsAgo)) // Filter by date
 ]
-//printing the result
-printResult(1, col, pipeline_1, "Selecting data of last four months")
+// Implement printResult function for displaying results (e.g., JSON output)
 }
 
 def jsonOutputSelected = JsonOutput.toJson(selectedCrimes)
 println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputSelected)}"
 ```
 
-**Outcome:** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/ESjYhXgkUVVGvJp7mlhnQ6wBxgaairRs-bII68Wn6ehqUQ?e=Bqlbqt)
+
 
 ---
 
 ### Projection Query
-Query Definition: Select only the latitude, longitude, crime type and last outcome category.
+**Query Definition:** Select only the latitude, longitude, crime type and last outcome category.
 
-**Code**
+This query performs a projection to retrieve only specific fields from each crime document. The fields selected include latitude, longitude, crime type, and the last known outcome category of each crime. Using a pipeline, the script structures the data to return these essential details for each crime, facilitating focused analysis.
+
+**Key Code Snippet Highlights** & for **Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EcaG_gLCwHtDoapA-0_cbZUBlzXSPOuI1Az6grnJRN6QSg?e=AXepra)
 ```groovy
 // Projection of Data
 def pipeline_2 = [
-	project(new Document()
-		.append("lat", new Document("\$arrayElemAt", ["\$location.geo.coordinates", 1]))
-		.append("lng", new Document("\$arrayElemAt", ["\$location.geo.coordinates", 0]))
-		.append("crime_type", 1)
-		.append("last_outcome_category", 1)
-	),
-	skip((pageNumber - 1) * pageSize),
-	limit(pageSize)
+    project(new Document()
+        .append("lat", new Document("\$arrayElemAt", ["\$location.geo.coordinates", 1])) // Get latitude
+        .append("lng", new Document("\$arrayElemAt", ["\$location.geo.coordinates", 0])) // Get longitude
+        .append("crime_type", 1) // Include crime type
+        .append("last_outcome_category", 1) // Include last outcome category
+    )
 ]
-printResult(2, col, pipeline_2, "Project latitude, longitude, crime_type and last_outcome_category_of_crimes")
+
+// Implement printResult function for displaying results in JSON format
 ```
 
-**Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EcaG_gLCwHtDoapA-0_cbZUBlzXSPOuI1Az6grnJRN6QSg?e=AXepra)
+---
 
 **Note**: Students Accommodations considered in filtering, grouping and combination query
 
@@ -135,114 +112,64 @@ printResult(2, col, pipeline_2, "Project latitude, longitude, crime_type and las
 ---
 
 ### Filtering Query
-Query Definition: Select only the location, crime type and last outcome category of crimes that happened in a radius of 1 km from Students accommodations​.
+**Query Definition:** Select only the location, crime type and last outcome category of crimes that happened in a radius of 1 km from Students accommodations​.
 
-**Code**
+In the filtering query, the script selects crimes that occurred within a 1-kilometer radius of pre-defined student accommodation locations. By using the $geoNear operator, the script filters the data based on geographic proximity. The projection further refines the data by selecting only location details, crime type, and the last outcome category. Unique crimes are then added to a list, ensuring no duplicate records are included in the final output.
+
+**Key Code Snippet Highlights** & for **Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EfjssWtsncxGgbWuwCPyPpMBL5Uxol8KFPB6ldR4_-eAcQ?e=FFAez7)
 ```groovy
 //col.createIndex(new Document("location.geo", "2dsphere"))
-//To filter the crime data happened within 1km of radius of each Students Accommodations
+// Iterate over list of student accommodation locations
 locationsToCheck.each { targetLocation ->
-		double targetLatitude = targetLocation[0]
-		double targetLongitude = targetLocation[1]
-	
-		def pipeline_3 = [
-				new Document("\$geoNear", new Document()
-						.append("near", new Document("type", "Point")
-								.append("coordinates", [targetLongitude, targetLatitude]))
-						.append("distanceField", "distance")
-						.append("maxDistance", 1000)
-						.append("spherical", true)
-				),
-				project(fields(include("location", "crime_type", "date", "last_outcome_category"),
-						computed("lat", "\$location.geo.lat"),
-						computed("lng", "\$location.geo.lng"))),
-				group(
-						new Document("location", "\$location.address")
-								.append("lat", "\$lat")
-								.append("lng", "\$lng")
-								.append("crime_type", "\$crime_type")
-								.append("last_outcome_category", "\$last_outcome_category")
-								.append("date", "\$date"),
-						first("location", "\$location.address"),
-						first("lat", "\$lat"),
-						first("lng", "\$lng"),
-						first("crime_type", "\$crime_type"),
-						first("date", "\$date"),
-						first("last_outcome_category", "\$last_outcome_category")
-				),
-				skip((pageNumber - 1) * pageSize),
-				limit(pageSize),
-		]
-	
-		def result = col.aggregate(pipeline_3).into([])
-		// Add only unique crimes to allCrimes
-		result.each { doc ->
-			def uniqueKey = "${doc._id}"
-			if (!uniqueCrimes.contains(uniqueKey)) {
-				uniqueCrimes.add(uniqueKey)
-				// Add to allCrimes if unique
-				allCrimes << doc
-			}
-		}
-	}
+    def pipeline_3 = [
+        new Document("\$geoNear", new Document()
+            .append("near", new Document("type", "Point").append("coordinates", [targetLocation[1], targetLocation[0]])) // Set target location
+            .append("distanceField", "distance") // Name field for calculated distance
+            .append("maxDistance", 1000) // Set max distance to 1km
+            .append("spherical", true) // Spherical geometry for calculation
+        ),
+        project(fields(include("location", "crime_type", "last_outcome_category"), // Include essential fields
+            computed("lat", "\$location.geo.lat"), // Compute latitude
+            computed("lng", "\$location.geo.lng")  // Compute longitude
+        ))
+    ]
+    // Aggregate results and check for unique crimes
+    // Implement logic to store unique records and avoid duplicates using Hashset
+}
 ```
-
-**Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EfjssWtsncxGgbWuwCPyPpMBL5Uxol8KFPB6ldR4_-eAcQ?e=FFAez7)
 
 ---
 
 ### Grouping and Combination Query
-Query Definition: With the data filtered, the sum of total cases grouped by location and crime type​.​
+**Query Definition:** With the data filtered, the sum of total cases grouped by location and crime type​.​
 
-**Code**
+This query combines filtering and grouping operations. After filtering crimes within a 1-kilometer radius of specified locations, the script groups the results by location and crime type to provide a count of total cases for each category. This grouping gives a summarized view of crime frequency and types for each area, enabling more focused reporting.
+
+**Key Code Snippet Highlights** & for **Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EZ1nfx8GrsZOnuXhuuHp0fYBsxXVhWk6YEImZh30tPsKyQ?e=rftY0h)
 ```groovy
 // Combination & Grouping of Data
+// Iterate over list of student accommodation locations
 locationsToCheck.each { targetLocation ->
-		double targetLatitude = targetLocation[0]
-		double targetLongitude = targetLocation[1]
-	
-		def pipeline_3 = [
-				new Document("\$geoNear", new Document()
-						.append("near", new Document("type", "Point")
-								.append("coordinates", [targetLongitude, targetLatitude]))
-						.append("distanceField", "distance")
-						.append("maxDistance", 1000)
-						.append("spherical", true)
-				),
-				project(fields(include("location", "crime_type", "date", "last_outcome_category"),
-						computed("lat", "\$location.geo.lat"),
-						computed("lng", "\$location.geo.lng"))),
-				group(
-						new Document("location", "\$location.address")
-								.append("lat", "\$lat")
-								.append("lng", "\$lng")
-								.append("crime_type", "\$crime_type")
-								.append("last_outcome_category", "\$last_outcome_category")
-								.append("date", "\$date"),
-						first("location", "\$location.address"),
-						first("lat", "\$lat"),
-						first("lng", "\$lng"),
-						first("crime_type", "\$crime_type"),
-						first("date", "\$date"),
-						first("last_outcome_category", "\$last_outcome_category")
-				),
-				skip((pageNumber - 1) * pageSize),// For Pagination
-				limit(pageSize),
-		]
-	
-		def result = col.aggregate(pipeline_3).into([])
-		// Add only unique crimes to allCrimes
-		result.each { doc ->
-			def uniqueKey = "${doc._id}"
-			if (!uniqueCrimes.contains(uniqueKey)) {
-				uniqueCrimes.add(uniqueKey)
-				// Add to allCrimes if unique
-				allCrimes << doc
-			}
-		}
-	}
+    def pipeline_3 = [
+        new Document("\$geoNear", new Document()
+            .append("near", new Document("type", "Point").append("coordinates", [targetLocation[1], targetLocation[0]])) // Set target location
+            .append("distanceField", "distance") // Name field for calculated distance
+            .append("maxDistance", 1000) // Set max distance to 1km
+            .append("spherical", true) // Spherical geometry for calculation
+        ),
+        project(fields(include("location", "crime_type", "last_outcome_category"), // Include essential fields
+            computed("lat", "\$location.geo.lat"), // Compute latitude
+            computed("lng", "\$location.geo.lng")  // Compute longitude
+        ))
+	group(
+		new Document("location", "\$location.address")
+			.append("crime_type", "\$crime_type"),
+		sum("crime_count", 1)
+	)
+    ]
+    // Aggregate results and check for unique crimes
+    // Implement logic to store unique records and avoid duplicates using HashMap
+}
 ```
-
-**Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EZ1nfx8GrsZOnuXhuuHp0fYBsxXVhWk6YEImZh30tPsKyQ?e=rftY0h)
 
 ---
