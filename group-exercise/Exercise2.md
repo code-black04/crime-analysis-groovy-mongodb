@@ -1,5 +1,12 @@
 ## Exercise 2 – Groovy Script Implementation 
 
+This task involves evaluating the crime information using Groovy. The objective is to analyze a dataset of crime incidents and utilize various methods to extract valuable information. The examination is divided into four stages:
+
+ - Selection Query: Select crimes that have occurred in the last 4 months.
+ - Projection Query: Extract specific details such as crime type, location (latitude and longitude), and the last outcome category.
+ - Filtering Query: Focus on crimes that happened within a 1km radius of student accommodations.
+ - Grouping and Combination Query: Group the filtered crimes by location and crime type, then count how many times each crime occurred in each location.
+ 
 ---
 
 ### Selection Query
