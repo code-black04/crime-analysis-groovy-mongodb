@@ -10,9 +10,10 @@ This task involves evaluating the crime information using Groovy. The objective 
 ---
 
 ### Selection Query
-Query Definition: Selection of crimes in the last 4 months.​
+**Query Definition:** Selection of crimes in the last 4 months.​
+This query filters the crime data to include only incidents that occurred within the last four months. It calculates a reference date by subtracting four months from the current date. Then, it processes the Leicestershire street crime data, selects non-null records that occurred after this reference date, and sorts the records in descending order, with the most recent crimes appearing first.
 
-**Code**
+**Key Code Snippet Highlighths** & **Outcome:** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EbEjMaUy0bFAlatqIxm94GIBTzpOabQ-WkZVkTzvqfsFRw?e=3gEjaZ)
 ```groovy
 // Selection of Data
 def NUM_MONTHS = 4
@@ -26,8 +27,8 @@ def selectedCrimes = measureExecutionTimeAndMemory(log, "Data Selection") {
 		.sort { a, b -> b.date <=> a.date }
 }
 
-def jsonOutputSelected = JsonOutput.toJson(selectedCrimes)
-println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputSelected)}"
+
+// prints Selected Crimes in JSON format
 ```
 
 **Outcome:** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EbEjMaUy0bFAlatqIxm94GIBTzpOabQ-WkZVkTzvqfsFRw?e=3gEjaZ)
@@ -35,9 +36,11 @@ println "\nSelected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputS
 ---
 
 ### Projection Query
-Query Definition: Select only the latitude, longitude, crime type and last outcome category.
+**Query Definition**: Select only the latitude, longitude, crime type and last outcome category.
+In this query ,we focus on the most important details: crime type, latitude, longitude, and the last outcome category. This reduces the dataset size, making it easier to analyze the key information. Crimes without geographic data are excluded, as location is essential for mapping and further analysis.
 
-**Code**
+
+**Key Code Snippet Highlighths** & **Outcome:** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EfrmsYiWy2hFljqQTBukD6EBN93UUugDUm5L55Q_z5PcJg?e=2svXvJ)
 ```groovy
 // Projection of Data
 def projectedCrimes = measureExecutionTimeAndMemory(log, "Data Projection") {
@@ -57,8 +60,7 @@ def projectedCrimes = measureExecutionTimeAndMemory(log, "Data Projection") {
 }
 
 // To print the projectedCrimes after converting to Json
-def jsonOutputProjected = JsonOutput.toJson(projectedCrimes)
-println "\nProjected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutputProjected)}"
+
 ```
 **Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EfrmsYiWy2hFljqQTBukD6EBN93UUugDUm5L55Q_z5PcJg?e=2svXvJ)
 
@@ -78,9 +80,13 @@ println "\nProjected Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutput
 ---
 
 ### Filtering Query
-Query Definition: Select only the location, crime type and last outcome category of crimes that happened in a radius of 1 km from Students accommodations​.
+**Query Definition:** Select only the location, crime type and last outcome category of crimes that happened in a radius of 1 km from Students accommodations​.
+This query filters the dataset to include only crimes that occurred within 1km of student accommodations. This helps us understand crime patterns near student areas.
+The Haversine formula is ben used inorder to calculate the distance between crime locations and the accommodation points. For each location, we extract its coordinates and check if each crime is within the 1km radius. Only crimes with valid coordinates within this distance are kept. We then gather essential details like latitude, longitude, crime type, and date, filling in missing information with default values and ensuring there are no duplicates before adding the records.
 
-**Code**
+**Key Code Snippet Highlighths** & **Outcome:**[Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EUyu5S9eXEtPhdC91WZF4k0BHYE-VfyEpZ5PGWxXjDrDIQ?e=YVqvE6)
+
+
 ```groovy
 //To filter the crime data happened within 1km of radius of each Students Accommodations
 def filteredCrimes = measureExecutionTimeAndMemory(log, "Data Filtering") {
@@ -122,8 +128,7 @@ def filteredCrimes = measureExecutionTimeAndMemory(log, "Data Filtering") {
 }
 
 //To print the filteredCrimes after converting to Json
-def jsonOutput = JsonOutput.toJson(filteredCrimes)
-println "\nAll Filtered Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOutput)}"
+
 ```
 
 **Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EUyu5S9eXEtPhdC91WZF4k0BHYE-VfyEpZ5PGWxXjDrDIQ?e=YVqvE6)
@@ -131,9 +136,12 @@ println "\nAll Filtered Crimes in JSON format:\n${JsonOutput.prettyPrint(jsonOut
 ---
 
 ### Grouping and Combination Query
-Query Definition: With the data filtered, the sum of total cases grouped by location and crime type​.​
+**Query Definition:** With the data filtered, the sum of total cases grouped by location and crime type​.​
 
-**Code**
+Finally, in this query , we then group the filtered crimes by location and crime type. This helps us see how many incidents of each crime type occurred in each location, providing a clearer picture of crime patterns.
+The organization of the data is done by by creating a list of crimes for each location. Within each location, we then group the crimes by type and count how many incidents of each type occurred. This gives us valuable insights into the most common crimes in specific areas and helps identify potential hotspots.
+
+**Key Code Snippet Highlighths** & **Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/Ec1fQnPI3ZpBiQBDH---G58BEIurXOdJ3C0GemmYwCqEqg?e=ZsW4ky)
 ```groovy
 // Combination & Grouping of Data
 def groupedByLocation = measureExecutionTimeAndMemory(log, "Data Combination and Grouping") {
@@ -148,8 +156,8 @@ def groupedByLocation = measureExecutionTimeAndMemory(log, "Data Combination and
 			]
 		}
 }
-def jsonOutputGrouped = JsonOutput.toJson(groupedByLocation)
-println "\nAll Grouped Crimes by location and crime type in JSON format:\n${JsonOutput.prettyPrint(jsonOutputGrouped)}"
+
+// print All Grouped Crimes by location and crime type in JSON format
 ```
 
 **Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/Ec1fQnPI3ZpBiQBDH---G58BEIurXOdJ3C0GemmYwCqEqg?e=ZsW4ky)
