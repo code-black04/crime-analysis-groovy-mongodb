@@ -31,9 +31,6 @@ def selectedCrimes = measureExecutionTimeAndMemory(log, "Data Selection") {
 
 // prints Selected Crimes in JSON format
 ```
-
-**Outcome:** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EbEjMaUy0bFAlatqIxm94GIBTzpOabQ-WkZVkTzvqfsFRw?e=3gEjaZ)
-
 ---
 
 ### Projection Query
@@ -64,7 +61,6 @@ def projectedCrimes = measureExecutionTimeAndMemory(log, "Data Projection") {
 // To print the projectedCrimes after converting to Json
 
 ```
-**Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EfrmsYiWy2hFljqQTBukD6EBN93UUugDUm5L55Q_z5PcJg?e=2svXvJ)
 
 **Note**: Students Accommodations considered in filtering, grouping and combination query
 
@@ -133,9 +129,6 @@ def filteredCrimes = measureExecutionTimeAndMemory(log, "Data Filtering") {
 //To print the filteredCrimes after converting to Json
 
 ```
-
-**Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EUyu5S9eXEtPhdC91WZF4k0BHYE-VfyEpZ5PGWxXjDrDIQ?e=YVqvE6)
-
 ---
 
 ### Grouping and Combination Query
@@ -162,7 +155,5 @@ def groupedByLocation = measureExecutionTimeAndMemory(log, "Data Combination and
 
 // print All Grouped Crimes by location and crime type in JSON format
 ```
-
-**Outcome** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/Ec1fQnPI3ZpBiQBDH---G58BEIurXOdJ3C0GemmYwCqEqg?e=ZsW4ky)
 
 ---
