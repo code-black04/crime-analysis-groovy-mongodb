@@ -41,3 +41,14 @@ Our current configuration includes:
 
 - **Read Mode**: *primaryPreferred*  
   Prioritises reading from the primary node but allows fallback to secondary nodes if the primary becomes unavailable.
+
+To obtain the time and memory data for each query, we follow a structured approach to measure both the duration and memory usage accurately.
+
+1. **Memory Usage**:
+   - First, we determine the *used memory* by calculating the difference between the *total memory* available to the system and the *free memory* at a specific time.
+   - Before executing a query, we record the current used memory. After the query completes, we record the used memory again.
+   - By subtracting the initial memory value from the final value, we get the *exact amount of memory consumed* by that query.
+
+2. **Execution Time**:
+   - To measure execution time, we capture the *start time* just before the query runs and the *end time* immediately after it finishes.
+   - The difference between the end time and start time gives the *total time taken* for the query to execute.
