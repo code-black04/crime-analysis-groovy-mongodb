@@ -31,7 +31,21 @@ Our project focuses on analyzing UK police data, providing insights into crime p
 **Motivation for the dataset**
 
 - Recent news from UK - [Click here..](https://www.bbc.co.uk/news/articles/cly6y67dkpzo)
+- Having a variety of data types
+- Having the ability to perform queries from simple to complex
+- Having latest and updated real-world data
 
+**Scope of the project**
+
+- To focus on the area around student accommodations
+- The analysis would help students to get an idea of what is happening in their surrounding and take precautions 
 ## Exercise 1 – Finalised Dataset, Intended Queries and their Definition
 
 **Selected Dataset** - [Police UK Dataset](https://data.police.uk/data) & its [Documentation](https://docs.google.com/document/d/1uKzc5ywcvgoFMXAJhTSx21n6-sOmbhmK4fAWK5J1HSk/edit?usp=sharing) 
+
+**Intended Queries and Definitions**
+
+- **Data Selection**: Select crime data of last four months
+- **Data Projection**: Project crime data by selecting Latitude, Longitude, Crime type and Last outcome category
+- **Data Filtering**: Filter crime data within 1km radius from student accommodation, based on Location, Crime type and Last outcome
+- **Data Combination & Grouping**: Get the summation of total cases grouped by Location and Crime type, with the filtered data
