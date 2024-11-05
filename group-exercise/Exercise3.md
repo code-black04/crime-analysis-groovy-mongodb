@@ -1,8 +1,16 @@
 ## Exercise 3 – MongoDB Script Implementation in Groovy
 
+In this a Groovy script is implemented to analyze crime data stored in MongoDB. The script performs various operations, including data loading, querying for recent data, projection of specific fields, filtering by proximity to student accommodations, and grouping for summarized reports.
+
+**Prerequisites**
+- MongoDB Atlas cluster (or a MongoDB instance)
+- Groovy for scripting
+- JSON file containing crime data
+- A properties file (mongodb.properties) with MongoDB credentials
 ---
 
-### Cloud Connectivity and Load file
+### Mongo Db Connectivity and Load file
+The script begins by establishing a connection to MongoDB, loading credentials from a properties file, and using them to securely connect to the database. Data is then loaded into the specified MongoDB collection from a JSON file, ensuring a refreshed data set by deleting any existing documents in the collection.
 
 **Code**
 
@@ -56,6 +64,8 @@ def loadData = { collection, filePath ->
 }
 def col = db.getCollection("police_crime_data")
 ```
+
+**Outcome**: The collection is populated with documents from the provided JSON file.
 
 ---
 
