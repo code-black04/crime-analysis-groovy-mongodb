@@ -11,6 +11,7 @@ This task involves evaluating the crime information using Groovy. The objective 
 
 ### Selection Query
 **Query Definition:** Selection of crimes in the last 4 months.​
+
 This query filters the crime data to include only incidents that occurred within the last four months. It calculates a reference date by subtracting four months from the current date. Then, it processes the Leicestershire street crime data, selects non-null records that occurred after this reference date, and sorts the records in descending order, with the most recent crimes appearing first.
 
 **Key Code Snippet Highlighths** & **Outcome:** [Click here](https://uniofleicester-my.sharepoint.com/:i:/g/personal/pm455_student_le_ac_uk/EbEjMaUy0bFAlatqIxm94GIBTzpOabQ-WkZVkTzvqfsFRw?e=3gEjaZ)
@@ -37,6 +38,7 @@ def selectedCrimes = measureExecutionTimeAndMemory(log, "Data Selection") {
 
 ### Projection Query
 **Query Definition**: Select only the latitude, longitude, crime type and last outcome category.
+
 In this query ,we focus on the most important details: crime type, latitude, longitude, and the last outcome category. This reduces the dataset size, making it easier to analyze the key information. Crimes without geographic data are excluded, as location is essential for mapping and further analysis.
 
 
@@ -81,6 +83,7 @@ def projectedCrimes = measureExecutionTimeAndMemory(log, "Data Projection") {
 
 ### Filtering Query
 **Query Definition:** Select only the location, crime type and last outcome category of crimes that happened in a radius of 1 km from Students accommodations​.
+
 This query filters the dataset to include only crimes that occurred within 1km of student accommodations. This helps us understand crime patterns near student areas.
 The Haversine formula is ben used inorder to calculate the distance between crime locations and the accommodation points. For each location, we extract its coordinates and check if each crime is within the 1km radius. Only crimes with valid coordinates within this distance are kept. We then gather essential details like latitude, longitude, crime type, and date, filling in missing information with default values and ensuring there are no duplicates before adding the records.
 
