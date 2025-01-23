@@ -3,11 +3,11 @@ plugins {
 	id 'eclipse'
 }
 
-sourceCompatibility = 21
+sourceCompatibility = 17
 
 eclipse {
 	project {
-		name 'week13_project'
+		name 'group04-leicester-police-records'
 		buildCommand 'org.eclipse.jdt.core.javabuilder'
 		buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
 		natures 'org.eclipse.jdt.core.javanature',
@@ -23,5 +23,7 @@ repositories {
 dependencies {
 	compileOnly 'org.apache.groovy:groovy-all:4.0.6'
 	compileOnly 'org.mongodb:mongodb-driver-sync:4.1.0'
+	compileOnly 'org.slf4j:slf4j-api:1.7.36'
+	compileOnly 'org.slf4j:slf4j-simple:1.7.36'
 }
 

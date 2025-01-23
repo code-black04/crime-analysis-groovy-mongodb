@@ -1,0 +1,188 @@
+{
+  "leicestershire-street": [
+	{
+	            "date": "2024-05",
+	            "reported_by": "Leicestershire Police",
+	            "falls_within": "Leicestershire Police",
+	            "location": {
+	                "address": "On or near Newarke Street",
+	                "geo": {
+	                    "lat": 52.631813,
+	                    "lng": -1.135537
+	                }
+	            },
+	            "LSOA": {
+	                "code": "E01032868",
+	                "name": "Leicester 041B"
+	            },
+	            "crime_type": "Anti-social behaviour"
+	        },
+			{
+				            "date": "2024-06",
+				            "reported_by": "Leicestershire Police",
+				            "falls_within": "Leicestershire Police",
+				            "location": {
+				                "address": "On or near Newarke Street",
+				                "geo": {
+				                    "lat": 52.631813,
+				                    "lng": -1.135537
+				                }
+				            },
+				            "LSOA": {
+				                "code": "E01032868",
+				                "name": "Leicester 041B"
+				            },
+				            "crime_type": "Anti-social behaviour"
+				        },
+	        {
+	            "date": "2024-05",
+	            "reported_by": "Leicestershire Police",
+	            "falls_within": "Leicestershire Police",
+	            "location": {
+	                "address": "On or near Norton Street",
+	                "geo": {
+	                    "lat": 52.630528,
+	                    "lng": -1.134336
+	                }
+	            },
+	            "LSOA": {
+	                "code": "E01032868",
+	                "name": "Leicester 041B"
+	            },
+	            "crime_type": "Anti-social behaviour"
+	        },
+			{
+			            "crime_id": "310f8e47363325169df837d540cfeddb13a27a5c298cfe435497d3d5e21a9d69",
+			            "date": "2024-06",
+			            "reported_by": "Leicestershire Police",
+			            "falls_within": "Leicestershire Police",
+			            "location": {
+			                "address": "On or near Upperton Road",
+			                "geo": {
+			                    "lat": 52.626137,
+			                    "lng": -1.151235
+			                }
+			            },
+			            "LSOA": {
+			                "code": "E01013774",
+			                "name": "Leicester 023A"
+			            },
+			            "crime_type": "Robbery",
+			            "last_outcome_category": "Under investigation"
+			        },
+			        {
+			            "crime_id": "758604c99dd62cbfd00791f2037a40fe443749640434fb9595bb77fa6e6f910a",
+			            "date": "2024-06",
+			            "reported_by": "Leicestershire Police",
+			            "falls_within": "Leicestershire Police",
+			            "location": {
+			                "address": "On or near Upperton Road",
+			                "geo": {
+			                    "lat": 52.626137,
+			                    "lng": -1.151235
+			                }
+			            },
+			            "LSOA": {
+			                "code": "E01013774",
+			                "name": "Leicester 023A"
+			            },
+			            "crime_type": "Robbery",
+			            "last_outcome_category": "Awaiting court outcome"
+			        },
+    {
+      "crime_id": "21ae5790312fc30fcbbd92dca79945328ec7707bfcde373001560567fd067371",
+      "date": "2024-07",
+      "reported_by": "Leicestershire Police",
+      "falls_within": "Leicestershire Police",
+      "location": {
+        "address": "On or near Geranium Grove",
+        "geo": {
+          "lat": 52.483616,
+          "lng": -1.842572
+        }
+      },
+      "LSOA": {
+        "code": "E01009197",
+        "name": "Birmingham 058C"
+      },
+      "crime_type": "Vehicle crime",
+      "last_outcome_category": "Unable to prosecute suspect"
+    },
+    {
+      "crime_id": "8f4a72d63dfa0abbe75814a74f88f1092124fe0d8a7336e2f5c08e5f99e3b82a",
+      "date": "2024-07",
+      "reported_by": "Leicestershire Police",
+      "falls_within": "Leicestershire Police",
+      "location": {
+        "address": "On or near Geranium Grove",
+        "geo": {
+          "lat": 52.483616,
+          "lng": -1.842572
+        }
+      },
+      "LSOA": {
+        "code": "E01009197",
+        "name": "Birmingham 058C"
+      },
+      "crime_type": "Violence and sexual offences",
+      "last_outcome_category": "Unable to prosecute suspect"
+    },
+    {
+      "crime_id": "26dc918eace77c3dd14ac272a02040df78ccaf20cc0ad8e1268022f2b6e83d2e",
+      "date": "2024-07",
+      "reported_by": "Leicestershire Police",
+      "falls_within": "Leicestershire Police",
+      "location": {
+        "address": "On or near Enfield Road",
+        "geo": {
+          "lat": 52.470869,
+          "lng": -1.913632
+        }
+      },
+      "LSOA": {
+        "code": "E01008994",
+        "name": "Birmingham 074B"
+      },
+      "crime_type": "Violence and sexual offences",
+      "last_outcome_category": "Under investigation"
+    },
+    {
+      "crime_id": "75f574dd315fd6a065f4314fc7f5dd1b591db2fb825dfde38648a34208cc3ef8",
+      "date": "2024-07",
+      "reported_by": "Leicestershire Police",
+      "falls_within": "Leicestershire Police",
+      "location": {
+        "address": "On or near Riverpark Way",
+        "geo": {
+          "lat": 52.401558,
+          "lng": -1.978012
+        }
+      },
+      "LSOA": {
+        "code": "E01009213",
+        "name": "Birmingham 124E"
+      },
+      "crime_type": "Drugs",
+      "last_outcome_category": "Under investigation"
+    },
+    {
+      "crime_id": "1073fc95ec2dd080dd5660c329eaa96b81ec2e22e2d2330bc139485e6a32862f",
+      "date": "2024-07",
+      "reported_by": "Leicestershire Police",
+      "falls_within": "Leicestershire Police",
+      "location": {
+        "address": "On or near Willoughby Gardens",
+        "geo": {
+          "lat": 52.62343,
+          "lng": -1.212224
+        }
+      },
+      "LSOA": {
+        "code": "E01025631",
+        "name": "Blaby 002A"
+      },
+      "crime_type": "Public order",
+      "last_outcome_category": "Unable to prosecute suspect"
+    }
+  ]
+}
